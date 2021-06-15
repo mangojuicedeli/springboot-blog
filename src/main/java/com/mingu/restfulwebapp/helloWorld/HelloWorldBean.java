@@ -1,4 +1,4 @@
-package com.mingu.restfulwebapp;
+package com.mingu.restfulwebapp.helloWorld;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
