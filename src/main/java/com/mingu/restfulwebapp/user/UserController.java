@@ -42,4 +42,12 @@ public class UserController {
         // 유저가 정상 생성된 경우, 기본 성공 코드인 200이 아닌 create(201)로 엄밀하게 응답 코드를 지정한다.
         return ResponseEntity.created(location).build();
     }
+
+    @DeleteMapping("/users/{id}")
+    public void deleteUser(@PathVariable int id) {
+        User user = service.deleteById(id);
+        if (user == null) {
+            throw new UserNotFoundException(String.format("ID[%s] not found", id));
+        }
+    }
 }
