@@ -50,4 +50,13 @@ public class UserController {
             throw new UserNotFoundException(String.format("ID[%s] not found", id));
         }
     }
+
+    @PutMapping("/users")
+    public User modifyUser(@RequestBody User user) {
+        User modifiedUser = service.modifyById(user);
+        if (modifiedUser == null) {
+            throw new UserNotFoundException(String.format("ID[%s] not found", user.getId()));
+        }
+        return modifiedUser;
+    }
 }

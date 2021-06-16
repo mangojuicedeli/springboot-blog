@@ -51,4 +51,16 @@ public class UserDaoService {
         }
         return null;
     }
+
+    public User modifyById(User user) {
+        for (User savedUser : users) {
+            if (savedUser.getId() == user.getId()) {
+                if (user.getName() != null) {
+                    savedUser.setName(user.getName());
+                    return savedUser;
+                }
+            }
+        }
+        return null;
+    }
 }
