@@ -1,5 +1,7 @@
 package com.mingu.restfulwebapp.user;
 
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -7,6 +9,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class UserController {
@@ -23,13 +28,21 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public User retrieveUser(@PathVariable int id) {
+    public ResponseEntity<EntityModel<User>> retrieveUser(@PathVariable int id) {
         User user = service.findOne(id);
         // 찾는 user가 없을 경우, null이 아닌 예외를 던져서 200 응답이 나오지 않게 한다.
         if (user == null) {
             throw new UserNotFoundException(String.format("ID[%s] not found", id));
         }
-        return user;
+        /*
+        HATEOAS
+         */
+        EntityModel entityModel = EntityModel.of(user);
+        // 개별 사용자 조회에서 할 수 있는 추가 작업으로 '전체 사용자 조회' uri를 'all-users'라는 이름으로 알려준다
+        WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllUsers());
+        entityModel.add(linkTo.withRel("all-users"));
+
+        return ResponseEntity.ok(entityModel);
     }
 
     @PostMapping("/users")
