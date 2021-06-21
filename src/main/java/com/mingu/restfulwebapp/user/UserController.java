@@ -40,6 +40,7 @@ public class UserController {
         EntityModel entityModel = EntityModel.of(user);
         // 개별 사용자 조회에서 할 수 있는 추가 작업으로 '전체 사용자 조회' uri를 'all-users'라는 이름으로 알려준다
         WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllUsers());
+        // Link 객체를 만든 후, entityModel에 추가하여 리턴한다.
         entityModel.add(linkTo.withRel("all-users"));
 
         return ResponseEntity.ok(entityModel);
