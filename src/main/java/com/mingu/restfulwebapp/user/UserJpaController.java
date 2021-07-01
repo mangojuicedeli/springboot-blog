@@ -48,4 +48,18 @@ public class UserJpaController {
     public void deleteUser(@PathVariable int id) {
         userRepository.deleteById(id);
     }
+
+    @PostMapping("/users")
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+        User savedUser = userRepository.save(user);
+        /*
+        생성 완료된 Resource를 조회할 수 있는 URI를 location 이라는 이름으로 헤더값에 실어서 보낸다.
+        ServletUriComponentBuilder는 uri를 생성해서 보낼 수 있는 클래스이다.
+         */
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedUser.getId())
+                .toUri();
+        return ResponseEntity.created(location).build();
+    }
 }
