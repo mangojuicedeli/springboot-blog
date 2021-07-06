@@ -22,6 +22,9 @@ public class UserJpaController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PostRepository postRepository;
+
     @GetMapping("/users")
     public List<User> retrieveAllUsers() {
         return userRepository.findAll();
@@ -71,5 +74,24 @@ public class UserJpaController {
             throw new UserNotFoundException(String.format("ID[%s] not found", id));
         }
         return user.get().getPosts();
+    }
+
+    @PostMapping("/users/{id}/posts")
+    public ResponseEntity<User> createPost(@PathVariable int id, @RequestBody Post post) {
+        Optional<User> user = userRepository.findById(id);
+        if (!user.isPresent()) {
+            throw new UserNotFoundException(String.format("ID[%s] not found", id));
+        }
+        post.setUser(user.get());
+        Post savedPost = postRepository.save(post);
+        /*
+        생성 완료된 Resource를 조회할 수 있는 URI를 location 이라는 이름으로 헤더값에 실어서 보낸다.
+        ServletUriComponentBuilder는 uri를 생성해서 보낼 수 있는 클래스이다.
+         */
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedPost.getId())
+                .toUri();
+        return ResponseEntity.created(location).build();
     }
 }
