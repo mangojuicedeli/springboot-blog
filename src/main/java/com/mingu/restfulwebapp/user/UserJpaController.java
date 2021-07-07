@@ -94,4 +94,22 @@ public class UserJpaController {
                 .toUri();
         return ResponseEntity.created(location).build();
     }
+
+    @GetMapping("/users/{userId}/posts/{postId}")
+    public EntityModel retrievePostByUser(@PathVariable int userId, @PathVariable int postId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (!user.isPresent()) {
+            throw new UserNotFoundException(String.format("User ID[%s] not found", userId));
+        }
+
+        Optional<Post> post = postRepository.findById(postId);
+        if (!post.isPresent()) {
+            throw new PostNotFoundException(String.format("Post ID[%s] not found", postId));
+        }
+
+        EntityModel entityModel = EntityModel.of(post);
+        WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllPostsByUser(userId));
+        entityModel.add(linkTo.withRel("all-posts-of-user"));
+        return entityModel;
+    }
 }
