@@ -1,5 +1,6 @@
-package com.mingu.restfulwebapp.user;
+package com.mingu.restfulwebapp.post;
 
+import com.mingu.restfulwebapp.post.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

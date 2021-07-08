@@ -1,5 +1,9 @@
 package com.mingu.restfulwebapp.user;
 
+import com.mingu.restfulwebapp.post.Post;
+import com.mingu.restfulwebapp.post.PostNotFoundException;
+import com.mingu.restfulwebapp.post.PostRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -16,14 +20,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/jpa")
 public class UserJpaController {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
     @GetMapping("/users")
     public List<User> retrieveAllUsers() {
@@ -37,9 +39,7 @@ public class UserJpaController {
             throw new UserNotFoundException(String.format("ID[%s] not found", id));
         }
 
-        /*
-        HATEOAS
-         */
+        /* HATEOAS */
         EntityModel entityModel = EntityModel.of(user);
         // 개별 사용자 조회에서 할 수 있는 추가 작업으로 Link 객체에 '전체 사용자 조회' uri를 넣어준다.
         WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllUsers());
@@ -84,6 +84,7 @@ public class UserJpaController {
         }
         post.setUser(user.get());
         Post savedPost = postRepository.save(post);
+
         /*
         생성 완료된 Resource를 조회할 수 있는 URI를 location 이라는 이름으로 헤더값에 실어서 보낸다.
         ServletUriComponentBuilder는 uri를 생성해서 보낼 수 있는 클래스이다.
@@ -111,5 +112,14 @@ public class UserJpaController {
         WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllPostsByUser(userId));
         entityModel.add(linkTo.withRel("all-posts-of-user"));
         return entityModel;
+    }
+
+    @DeleteMapping("/posts/{postId}")
+    public void deletePost(@PathVariable int postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        if (!post.isPresent()) {
+            throw new PostNotFoundException(String.format("Post ID[%s] not found", postId));
+        }
+        postRepository.deleteById(postId);
     }
 }

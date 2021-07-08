@@ -1,6 +1,7 @@
-package com.mingu.restfulwebapp.user;
+package com.mingu.restfulwebapp.post;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mingu.restfulwebapp.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
