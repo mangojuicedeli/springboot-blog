@@ -1,10 +1,13 @@
-package com.mingu.restfulwebapp.user;
+package com.mingu.restfulwebapp.user.controller;
 
 import com.mingu.restfulwebapp.post.Post;
-import com.mingu.restfulwebapp.post.PostNotFoundException;
+import com.mingu.restfulwebapp.exception.PostNotFoundException;
 import com.mingu.restfulwebapp.post.PostRepository;
+import com.mingu.restfulwebapp.post.PostService;
+import com.mingu.restfulwebapp.user.User;
+import com.mingu.restfulwebapp.exception.UserNotFoundException;
+import com.mingu.restfulwebapp.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -21,20 +24,20 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/jpa")
-public class UserJpaController {
+@RequestMapping("/api/users")
+public class UserController {
 
-    private final UserRepository userRepository;
-    private final PostRepository postRepository;
+    private final UserService userService;
+    private final PostService postService;
 
-    @GetMapping("/users")
+    @GetMapping("/all")
     public List<User> retrieveAllUsers() {
-        return userRepository.findAll();
+        return userService.getAllUsers();
     }
 
-    @GetMapping("/users/{id}")
-    public EntityModel retrieveUser(@PathVariable int id) {
-        Optional<User> user = userRepository.findById(id);
+    @GetMapping("/{id}")
+    public EntityModel retrieveUser(@PathVariable Long id) {
+        Optional<User> user = userService.getUserById(id);
         if (!user.isPresent()) {
             throw new UserNotFoundException(String.format("ID[%s] not found", id));
         }
@@ -48,14 +51,14 @@ public class UserJpaController {
         return entityModel;
     }
 
-    @DeleteMapping("/users/{id}")
-    public void deleteUser(@PathVariable int id) {
-        userRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Long id) {
+        userService.removeUserById(id);
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        User savedUser = userRepository.save(user);
+        User savedUser = userService.create(user);
         /*
         생성 완료된 Resource를 조회할 수 있는 URI를 location 이라는 이름으로 헤더값에 실어서 보낸다.
         ServletUriComponentBuilder는 uri를 생성해서 보낼 수 있는 클래스이다.
@@ -67,23 +70,23 @@ public class UserJpaController {
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/users/{id}/posts")
-    public List<Post> retrieveAllPostsByUser(@PathVariable int id) {
-        Optional<User> user = userRepository.findById(id);
+    @GetMapping("/{id}/posts")
+    public List<Post> retrieveAllPostsByUser(@PathVariable Long id) {
+        Optional<User> user = userService.getUserById(id);
         if (!user.isPresent()) {
             throw new UserNotFoundException(String.format("ID[%s] not found", id));
         }
         return user.get().getPosts();
     }
 
-    @PostMapping("/users/{id}/posts")
-    public ResponseEntity<User> createPost(@PathVariable int id, @RequestBody Post post) {
-        Optional<User> user = userRepository.findById(id);
+    @PostMapping("/{id}/posts")
+    public ResponseEntity<User> createPost(@PathVariable Long id, @RequestBody Post post) {
+        Optional<User> user = userService.getUserById(id);
         if (!user.isPresent()) {
             throw new UserNotFoundException(String.format("ID[%s] not found", id));
         }
         post.setUser(user.get());
-        Post savedPost = postRepository.save(post);
+        Post savedPost = postService.create(post);
 
         /*
         생성 완료된 Resource를 조회할 수 있는 URI를 location 이라는 이름으로 헤더값에 실어서 보낸다.
@@ -96,14 +99,14 @@ public class UserJpaController {
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/users/{userId}/posts/{postId}")
-    public EntityModel retrievePostByUser(@PathVariable int userId, @PathVariable int postId) {
-        Optional<User> user = userRepository.findById(userId);
+    @GetMapping("/{userId}/posts/{postId}")
+    public EntityModel retrievePostByUser(@PathVariable Long userId, @PathVariable Long postId) {
+        Optional<User> user = userService.getUserById(userId);
         if (!user.isPresent()) {
             throw new UserNotFoundException(String.format("User ID[%s] not found", userId));
         }
 
-        Optional<Post> post = postRepository.findById(postId);
+        Optional<Post> post = postService.getPostById(postId);
         if (!post.isPresent()) {
             throw new PostNotFoundException(String.format("Post ID[%s] not found", postId));
         }
@@ -115,11 +118,11 @@ public class UserJpaController {
     }
 
     @DeleteMapping("/posts/{postId}")
-    public void deletePost(@PathVariable int postId) {
-        Optional<Post> post = postRepository.findById(postId);
+    public void deletePost(@PathVariable Long postId) {
+        Optional<Post> post = postService.getPostById(postId);
         if (!post.isPresent()) {
             throw new PostNotFoundException(String.format("Post ID[%s] not found", postId));
         }
-        postRepository.deleteById(postId);
+        postService.removePostById(postId);
     }
 }

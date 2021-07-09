@@ -3,7 +3,6 @@ package com.mingu.restfulwebapp.user;
 import com.mingu.restfulwebapp.post.Post;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,21 +16,12 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 //@JsonIgnoreProperties(value = {"password"})
 //@JsonFilter("UserInfo") // UserInfo 라는 이름의 필터를 추가
 @ApiModel(description = "사용자 정보 도메인 객체")
 @Entity
 public class User {
-
-    public User(Integer id, String name, Date joinDate, String password, String ssn) {
-        this.id = id;
-        this.name = name;
-        this.joinDate = joinDate;
-        this.password = password;
-        this.ssn = ssn;
-    }
 
     @Id
     @GeneratedValue
